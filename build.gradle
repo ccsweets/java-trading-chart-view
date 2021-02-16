@@ -1,0 +1,17 @@
+plugins {
+    id 'java'
+}
+
+group 'com.ccsweets.tradechart'
+version '0.1.0'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'com.seomse.commons:seomse-commons:1.2.2'
+    implementation 'com.seomse.trading:seomse-trading:0.1.9'
+
+}
+
