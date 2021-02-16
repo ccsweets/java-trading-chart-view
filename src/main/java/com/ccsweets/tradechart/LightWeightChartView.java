@@ -27,14 +27,12 @@ public class LightWeightChartView {
     CandleStick[] candleStickArr;
     StringBuilder createChartStr = new StringBuilder();
     ChartDateType dateType;
-    String jsContents;
     public LightWeightChartView(CandleStick[] candleStickArr){
         this(candleStickArr,600,300,ChartDateType.DAY);
     }
     public LightWeightChartView(CandleStick[] candleStickArr , int width , int height , ChartDateType dateType){
         this.candleStickArr = candleStickArr;
         this.dateType = dateType;
-        jsContents = FileUtil.getFileContents(new File("chart/lightweight-charts.js"), "UTF-8");
 
         //createChartStr.append("<script>").append(fileContents).append("</script>\n");
 
@@ -99,9 +97,9 @@ public class LightWeightChartView {
                         low: %.2f,
                         open: %.2f,
                         time: {
-                          year: %d,
-                          month: %d,
-                          day: %d
+                          year: %s,
+                          month: %s,
+                          day: %s
                         }
                       },
                     """.formatted(
@@ -115,11 +113,11 @@ public class LightWeightChartView {
                         low: %.2f,
                         open: %.2f,
                         time: {
-                          year: %d,
-                          month: %d,
-                          day: %d,
-                          hour: %d,
-                          minute: %d
+                          year: %s,
+                          month: %s,
+                          day: %s,
+                          hour: %s,
+                          minute: %s
                         }
                       },
                     """.formatted(
@@ -152,9 +150,9 @@ public class LightWeightChartView {
                 createChartStr.append("""
                     {
                         time: {
-                          year: %d,
-                          month: %d,
-                          day: %d
+                          year: %s,
+                          month: %s,
+                          day: %s
                         },
                         value: %.2f
                       },
@@ -165,11 +163,11 @@ public class LightWeightChartView {
                 createChartStr.append("""
                     {
                         time: {
-                          year: %d,
-                          month: %d,
-                          day: %d,
-                          hour: %d,
-                          minute: %d
+                          year: %s,
+                          month: %s,
+                          day: %s,
+                          hour: %s,
+                          minute: %s
                         },
                         value: %.2f
                       },
@@ -196,10 +194,10 @@ public class LightWeightChartView {
                 """
         );
 
-        result.append("<script>").append(jsContents).append("</script>\n");
+        result.append("<script src='https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js'></script>\n");
         result.append("<script>\n").append(createChartStr.toString()).append("\n</script>\n");
 
-        return result.toString();
+        return result.append("</body></html>").toString();
     }
     public static void main(String [] args){
 
