@@ -84,98 +84,110 @@ public class LightWeightChartView {
             double low = candleStick.getLow();
             double high = candleStick.getHigh();
             long openTime = candleStick.getOpenTime();
-            String year = DateUtil.getDateYmd(openTime,"yyyy");
-            String month = DateUtil.getDateYmd(openTime,"MM");
-            String day = DateUtil.getDateYmd(openTime,"dd");
-            String hour = DateUtil.getDateYmd(openTime,"HH");
-            String minute = DateUtil.getDateYmd(openTime,"mm");
-            if(!dateType.equals(ChartDateType.MINUTE)){
-                createChartStr.append("""
-                    {
-                        close: %.2f,
-                        high: %.2f,
-                        low: %.2f,
-                        open: %.2f,
-                        time: {
-                          year: %s,
-                          month: %s,
-                          day: %s
-                        }
-                      },
-                    """.formatted(
-                            close,high,low,open,year,month,day
-                ));
+            String timeStr;
+            if(dateType.equals(ChartDateType.DAY)){
+                timeStr  = DateUtil.getDateYmd(candleStick.getOpenTime(),"yyyy-MM-dd");
             } else {
-                createChartStr.append("""
+                timeStr  = DateUtil.getDateYmd(candleStick.getOpenTime(),"yyyy-MM-dd HH:mm");
+            }
+            createChartStr.append("""
                     {
                         close: %.2f,
                         high: %.2f,
                         low: %.2f,
                         open: %.2f,
-                        time: {
-                          year: %s,
-                          month: %s,
-                          day: %s,
-                          hour: %s,
-                          minute: %s
-                        }
+                        time: '%s'
                       },
                     """.formatted(
-                        close,high,low,open,year,month,day,hour,minute
-                ));
-            }
-
+                    close,high,low,open,timeStr
+            ));
         }
         createChartStr.setLength(createChartStr.length()-1);
         createChartStr.append("]);\n");
     }
-    public void addLine(LineData[] lineDataArr , int r , int g , int b , int a , int size){
+
+    public void addMarkerAll(MarkerData[] markerDataArray) {
+        createChartStr.append("""
+              var markers = [];
+                """);
+
+        for (MarkerData markerData : markerDataArray) {
+            String timeStr;
+            if(dateType.equals(ChartDateType.DAY)){
+                timeStr  = DateUtil.getDateYmd(markerData.getTime(),"yyyy-MM-dd");
+            } else {
+                timeStr  = DateUtil.getDateYmd(markerData.getTime(),"yyyy-MM-dd HH:mm");
+            }
+            createChartStr.append("""
+                markers.push({ time: '%s', position: '%s', color: '%s', shape: '%s', text: '%s'});
+                """
+            .formatted(timeStr,markerData.getMarkerType().name(),markerData.getColor(),markerData.getMarkerShape().name(),markerData.getText())
+            );
+        }
+        createChartStr.append("candlestickSeries.setMarkers(markers);");
+    }
+
+    public void addVolumeAll(VolumeData[] volumeDataArr, double topMargin , double bottomMargin){
+        createChartStr.append("""
+                var volumeSeries = chart.addHistogramSeries({
+                  	color: '#26a69a',
+                  	priceFormat: {
+                  		type: 'volume',
+                  	},
+                  	priceScaleId: '',
+                  	scaleMargins: {
+                  		top: %.1f,
+                  		bottom: %.1f,
+                  	},
+                  });
+                  volumeSeries.setData([
+                """.formatted(topMargin,bottomMargin));
+        int volumeDataArrSize = volumeDataArr.length;
+        for (int i = 0; i < volumeDataArrSize; i++) {
+            VolumeData volumeData = volumeDataArr[i];
+            String timeStr;
+            if(dateType.equals(ChartDateType.DAY)){
+                timeStr  = DateUtil.getDateYmd(volumeData.getTime(),"yyyy-MM-dd");
+            } else {
+                timeStr  = DateUtil.getDateYmd(volumeData.getTime(),"yyyy-MM-dd HH:mm");
+            }
+
+            createChartStr.append("""
+                { time: '%s', value: %.2f, color: '%s' },
+                """.formatted(timeStr,volumeData.getVolume() , volumeData.getColor()));
+        }
+        createChartStr.append("]);");
+    }
+
+
+    public void addLineAll(LineData[] lineDataArr ,String color, int size){
         createChartStr.append("""
                 chart.addLineSeries({
-                  color: 'rgba(%d, %d, %d, %d)',
+                  color: '%s',
                   lineWidth: %d,
                 }).setData([
-                """.formatted(r,g,b,a,size));
+                """.formatted(color,size));
         int lineDataArrSize = lineDataArr.length;
         for (int i = 0; i < lineDataArrSize; i++) {
             LineData lineData = lineDataArr[i];
             long openTime = lineData.getTime();
             double price = lineData.getPrice();
-            String year = DateUtil.getDateYmd(openTime,"yyyy");
-            String month = DateUtil.getDateYmd(openTime,"MM");
-            String day = DateUtil.getDateYmd(openTime,"dd");
-            String hour = DateUtil.getDateYmd(openTime,"HH");
-            String minute = DateUtil.getDateYmd(openTime,"mm");
-            if(!dateType.equals(ChartDateType.MINUTE)){
-                createChartStr.append("""
-                    {
-                        time: {
-                          year: %s,
-                          month: %s,
-                          day: %s
-                        },
-                        value: %.2f
-                      },
-                    """.formatted(
-                            year,month,day,price
-                ));
-            } else {
-                createChartStr.append("""
-                    {
-                        time: {
-                          year: %s,
-                          month: %s,
-                          day: %s,
-                          hour: %s,
-                          minute: %s
-                        },
-                        value: %.2f
-                      },
-                    """.formatted(
-                        year,month,day,hour,minute,price
-                ));
-            }
 
+
+            String timeStr;
+            if(dateType.equals(ChartDateType.DAY)){
+                timeStr  = DateUtil.getDateYmd(lineData.getTime(),"yyyy-MM-dd");
+            } else {
+                timeStr  = DateUtil.getDateYmd(lineData.getTime(),"yyyy-MM-dd HH:mm");
+            }
+            createChartStr.append("""
+                    {
+                        time: '%s',
+                        value: %.2f
+                      },
+                    """.formatted(
+                    timeStr,price
+            ));
 
         }
 
@@ -187,7 +199,7 @@ public class LightWeightChartView {
                 <!DOCTYPE html>
                 <html>
                 <head>
-                  <title>PURE Unobtrusive Rendering Engine</title>
+                  <title>Seomse LightWeight-Chart View</title>
                   <script src="http://pure.github.io/pure/libs/pure.js"></script>
                 </head>
                 <body>
